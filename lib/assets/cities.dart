@@ -1,8 +1,6 @@
 const List<String> cityList = [
   "Hà Nội",
-  "Huế",
-  "Nha Trang",
-  "Cần Thơ",
-  "Hải Phòng",
+  "Thành phố Hồ Chí Minh",
+  "Bình Dương",
   "Vũng Tàu",
 ];

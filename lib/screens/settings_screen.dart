@@ -11,9 +11,8 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   String temperatureUnit = 'C';
-  String windSpeedUnit = 'm/s';
   String timeFormat = '24h';
-  String language = 'Tiếng Việt';
+  String themeMode = 'light';
 
   bool isLoading = true;
 
@@ -25,12 +24,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    themeMode = prefs.getString('themeMode') ?? 'light';
 
     setState(() {
       temperatureUnit = prefs.getString('temperatureUnit') ?? 'C';
-      windSpeedUnit = prefs.getString('windSpeedUnit') ?? 'm/s';
       timeFormat = prefs.getString('timeFormat') ?? '24h';
-      language = prefs.getString('language') ?? 'Tiếng Việt';
       isLoading = false;
     });
   }
@@ -44,9 +42,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     await settingsProvider.updateSettings(
       tempUnit: temperatureUnit,
-      windUnit: windSpeedUnit,
       timeFmt: timeFormat,
-      lang: language,
+      theme: themeMode,
     );
 
     await _loadSettings();
@@ -56,7 +53,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Đã lưu & áp dụng cài đặt'),
-        backgroundColor: const Color.fromARGB(255, 54, 54, 54),
+        backgroundColor: Theme.of(context).colorScheme.surface,
         duration: const Duration(seconds: 2),
       ),
     );
@@ -73,12 +70,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       margin: const EdgeInsets.only(bottom: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).dividerColor),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black54
+                : Colors.black.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -93,10 +92,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               const SizedBox(width: 10),
               Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
             ],
@@ -128,7 +125,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               : FontWeight.normal,
                           color: isSelected
                               ? Colors.blueAccent
-                              : Colors.black87,
+                              : Theme.of(context).textTheme.bodyMedium?.color,
                         ),
                       ),
                       Container(
@@ -139,7 +136,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           border: Border.all(
                             color: isSelected
                                 ? Colors.blueAccent
-                                : Colors.grey.shade400,
+                                : Theme.of(context).dividerColor,
                             width: 2,
                           ),
                           color: isSelected
@@ -168,13 +165,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        iconTheme: Theme.of(context).iconTheme,
+        title: Text(
           'Cài đặt',
-          style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Theme.of(context).textTheme.bodyLarge?.color,
+          ),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
       ),
       body: isLoading
@@ -194,17 +195,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onChanged: (v) => setState(() => temperatureUnit = v),
                   ),
                   _buildModernSettingCard(
-                    title: 'Đơn vị tốc độ gió',
-                    icon: Icons.air_outlined,
-                    options: const [
-                      {'display': 'Mét/giây (m/s)', 'value': 'm/s'},
-                      {'display': 'Kilômét/giờ (km/h)', 'value': 'km/h'},
-                      {'display': 'Dặm/giờ (mph)', 'value': 'mph'},
-                    ],
-                    groupValue: windSpeedUnit,
-                    onChanged: (v) => setState(() => windSpeedUnit = v),
-                  ),
-                  _buildModernSettingCard(
                     title: 'Định dạng thời gian',
                     icon: Icons.access_time_outlined,
                     options: const [
@@ -215,21 +205,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onChanged: (v) => setState(() => timeFormat = v),
                   ),
                   _buildModernSettingCard(
-                    title: 'Ngôn ngữ',
-                    icon: Icons.language_outlined,
+                    title: 'Giao diện',
+                    icon: Icons.dark_mode_outlined,
                     options: const [
-                      {'display': 'Tiếng Việt', 'value': 'Tiếng Việt'},
-                      {'display': 'English', 'value': 'English'},
+                      {'display': 'Sáng', 'value': 'light'},
+                      {'display': 'Tối', 'value': 'dark'},
+                      {'display': 'Theo hệ thống', 'value': 'system'},
                     ],
-                    groupValue: language,
-                    onChanged: (v) => setState(() => language = v),
+                    groupValue: themeMode,
+                    onChanged: (v) => setState(() => themeMode = v),
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: isLoading ? null : _saveSettings,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 0, 0, 0),
-                      foregroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -254,20 +245,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
 class SettingsProvider extends ChangeNotifier {
   String temperatureUnit = 'C';
-  String windSpeedUnit = 'm/s';
   String timeFormat = '24h';
-  String language = 'Tiếng Việt';
+  ThemeMode themeMode = ThemeMode.light;
 
   bool isLoaded = false;
 
   /// Loads settings from SharedPreferences
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    final theme = prefs.getString('themeMode') ?? 'light';
 
     temperatureUnit = prefs.getString('temperatureUnit') ?? 'C';
-    windSpeedUnit = prefs.getString('windSpeedUnit') ?? 'm/s';
     timeFormat = prefs.getString('timeFormat') ?? '24h';
-    language = prefs.getString('language') ?? 'Tiếng Việt';
+
+    if (theme == 'dark') {
+      themeMode = ThemeMode.dark;
+    } else if (theme == 'system') {
+      themeMode = ThemeMode.system;
+    } else {
+      themeMode = ThemeMode.light;
+    }
 
     isLoaded = true;
     notifyListeners();
@@ -276,21 +273,24 @@ class SettingsProvider extends ChangeNotifier {
   /// Updates settings and saves to SharedPreferences
   Future<void> updateSettings({
     required String tempUnit,
-    required String windUnit,
     required String timeFmt,
-    required String lang,
+    required String theme,
   }) async {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString('temperatureUnit', tempUnit);
-    await prefs.setString('windSpeedUnit', windUnit);
     await prefs.setString('timeFormat', timeFmt);
-    await prefs.setString('language', lang);
+    await prefs.setString('themeMode', theme);
 
     temperatureUnit = tempUnit;
-    windSpeedUnit = windUnit;
     timeFormat = timeFmt;
-    language = lang;
+    if (theme == 'dark') {
+      themeMode = ThemeMode.dark;
+    } else if (theme == 'system') {
+      themeMode = ThemeMode.system;
+    } else {
+      themeMode = ThemeMode.light;
+    }
 
     notifyListeners();
   }

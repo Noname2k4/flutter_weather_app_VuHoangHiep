@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
-import 'package:weather_app/screens/forecast_screen.dart';
 import '../providers/location_provider.dart';
 import '../providers/weather_provider.dart';
-import '../providers/map_provider.dart';
 import '../widgets/hourly_forecast_list.dart';
 import '../widgets/daily_forecast_card.dart';
 import '../screens/search_screen.dart';
 import '../screens/manuailocation_screen.dart';
 import '../screens/settings_screen.dart';
-import '../screens/forecast_screen.dart';
-import '../config/api_config.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,9 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadInitialData();
-    });
+    _loadInitialData();
   }
 
   Future<void> _loadInitialData() async {
@@ -41,10 +35,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final location = locationProvider.currentLocation;
     if (location != null) {
-      await Future.wait([
-        weatherProvider.fetchWeather(location.latitude, location.longitude),
-        weatherProvider.fetchForecast(location.latitude, location.longitude),
-      ]);
+      await weatherProvider.fetchWeather(location.latitude, location.longitude);
+      await weatherProvider.fetchForecast(
+        location.latitude,
+        location.longitude,
+      );
     }
   }
 
@@ -54,10 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final location = locationProvider.currentLocation;
 
     if (location != null) {
-      await Future.wait([
-        weatherProvider.fetchWeather(location.latitude, location.longitude),
-        weatherProvider.fetchForecast(location.latitude, location.longitude),
-      ]);
+      await weatherProvider.fetchWeather(location.latitude, location.longitude);
+      await weatherProvider.fetchForecast(
+        location.latitude,
+        location.longitude,
+      );
     }
   }
 
@@ -69,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return DateFormat('HH:mm').format(time);
   }
 
-  String formatDate(DateTime dt) => DateFormat('EEE, dd/MM/yyyy').format(dt);
+  String formatDate(DateTime dt) => DateFormat('dd/MM/yyyy').format(dt);
 
   @override
   Widget build(BuildContext context) {
@@ -84,21 +80,19 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
         elevation: 2,
-        title: const Text(
+        title: Text(
           'Thời tiết',
           style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
+            color: Theme.of(context).textTheme.titleLarge?.color,
           ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.black),
+            icon: Icon(Icons.search, color: Theme.of(context).iconTheme.color),
             onPressed: () {
               Navigator.push(
                 context,
@@ -107,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.list, color: Colors.black),
+            icon: Icon(Icons.list, color: Theme.of(context).iconTheme.color),
             onPressed: () {
               Navigator.push(
                 context,
@@ -116,30 +110,14 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.black),
+            icon: Icon(
+              Icons.settings,
+              color: Theme.of(context).iconTheme.color,
+            ),
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.map, color: Colors.black),
-            onPressed: () {
-              final weather = context.read<WeatherProvider>().weather;
-              if (weather == null) return;
-
-              context.read<MapProvider>().setLocation(
-                weather.latitude,
-                weather.longitude,
-              );
-
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ForecastScreen(apiKey: ApiConfig.apiKey),
-                ),
               );
             },
           ),
@@ -169,7 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
         itemBuilder: (_, index) {
-          if (weatherProvider.isLoading) {
+          if (weatherProvider.isLoading || !settings.isLoaded) {
             return const Center(child: CircularProgressIndicator());
           }
           if (weatherProvider.error != null) {
@@ -198,16 +176,21 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text(
               weatherProvider.weather!.cityName,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'Ngày giờ: ${formatDate(weatherProvider.weather!.dateTime)} ${formatTime(context, weatherProvider.weather!.dateTime)}',
-              style: const TextStyle(fontSize: 16, color: Colors.black54),
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+              ),
             ),
             const SizedBox(height: 16),
 
@@ -251,16 +234,21 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 12),
                   Text(
                     '${_formatTemperature(weatherProvider.weather!.temperature, settings.temperatureUnit)}°${settings.temperatureUnit}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 52,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     weatherProvider.weather!.description,
-                    style: const TextStyle(fontSize: 18, color: Colors.white70),
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+                    ),
                   ),
                 ],
               ),
@@ -270,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(
               width: double.infinity,
               child: Card(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -285,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         runSpacing: 16,
                         children: [
                           _buildInfoItem(
-                            'Cảm giác như',
+                            'Nhiệt độ',
                             '${_formatTemperature(weatherProvider.weather!.feelsLike, settings.temperatureUnit)}°${settings.temperatureUnit}',
                             itemWidth,
                           ),
@@ -296,12 +284,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           _buildInfoItem(
                             'Gió',
-                            '${_formatWind(weatherProvider.weather!.windSpeed, settings.windSpeedUnit)} ${settings.windSpeedUnit}\nHướng: ${weatherProvider.weather!.windDeg}°',
-                            itemWidth,
-                          ),
-                          _buildInfoItem(
-                            'Áp suất',
-                            '${weatherProvider.weather!.pressure} hPa',
+                            '${weatherProvider.weather!.windSpeed.toStringAsFixed(1)} m/s\nHướng: ${weatherProvider.weather!.windDeg}°',
                             itemWidth,
                           ),
                           _buildInfoItem(
@@ -338,23 +321,23 @@ class _HomeScreenState extends State<HomeScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Dự báo theo giờ',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ),
             const SizedBox(height: 12),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 6,
-                    offset: Offset(0, 3),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.black54
+                        : Colors.black12,
                   ),
                 ],
               ),
@@ -367,10 +350,10 @@ class _HomeScreenState extends State<HomeScreen> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Dự báo 5 ngày',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ),
@@ -381,11 +364,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     (e) => Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [
+                        boxShadow: [
                           BoxShadow(
-                            color: Colors.black12,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.black54
+                                : Colors.black12,
                             blurRadius: 6,
                             offset: Offset(0, 3),
                           ),
@@ -410,15 +396,20 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 14, color: Colors.black54),
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
         ],
@@ -429,11 +420,5 @@ class _HomeScreenState extends State<HomeScreen> {
   String _formatTemperature(double temp, String unit) {
     if (unit == 'F') temp = (temp * 9 / 5) + 32;
     return temp.toStringAsFixed(1);
-  }
-
-  String _formatWind(double wind, String unit) {
-    if (unit == 'km/h') wind *= 3.6;
-    if (unit == 'mph') wind *= 2.23694;
-    return wind.toStringAsFixed(1);
   }
 }

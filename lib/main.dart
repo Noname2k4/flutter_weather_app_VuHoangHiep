@@ -5,7 +5,6 @@ import 'providers/weather_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/search_screen.dart';
 import 'screens/settings_screen.dart';
-import 'providers/map_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
@@ -19,7 +18,6 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => LocationProvider()),
         ChangeNotifierProvider(create: (_) => WeatherProvider()),
         ChangeNotifierProvider(create: (_) => SearchProvider()),
-        ChangeNotifierProvider(create: (_) => MapProvider()),
         ChangeNotifierProvider(
           create: (_) => SettingsProvider()..loadSettings(),
         ),
@@ -34,9 +32,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+    return Consumer<SettingsProvider>(
+      builder: (context, settings, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+
+          themeMode: settings.themeMode,
+
+          home: const HomeScreen(),
+        );
+      },
     );
   }
 }
