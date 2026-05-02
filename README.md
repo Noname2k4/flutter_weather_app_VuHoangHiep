@@ -6,15 +6,11 @@
 
 Ứng dụng sử dụng API thời tiết (OpenWeatherMap), kết hợp với quản lý trạng thái bằng Provider, giúp dữ liệu được cập nhật realtime và giao diện phản hồi nhanh chóng.
 
---- 
-
 ## Demo
 
 ## 🎬 Demo
 
 👉 [Video Demo](https://drive.google.com/drive/folders/1QElrrhJGq0Prv9bpMtkMictZsVq20vTy?usp=sharing)
-
----
 
 ## 🚀 Các tính năng chính
 
@@ -32,7 +28,7 @@
 ## Hướng dẫn thiết lập API (Bảo mật khóa)
 
 1. Tạo file .env
-- Thêm API key vào file
+Thêm API key vào file
 
 ```bash
 OPEN_WEATHER_API_KEY=your_openweather_api_key
