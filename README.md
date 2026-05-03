@@ -6,11 +6,9 @@
 
 Ứng dụng sử dụng API thời tiết (OpenWeatherMap), kết hợp với quản lý trạng thái bằng Provider, giúp dữ liệu được cập nhật realtime và giao diện phản hồi nhanh chóng.
 
-## Demo
-
 ## 🎬 Demo
 
-👉 [Video Demo](https://drive.google.com/drive/folders/1QElrrhJGq0Prv9bpMtkMictZsVq20vTy?usp=sharing)
+👉 [Video Demo]
 
 ## 🚀 Các tính năng chính
 
@@ -127,6 +125,24 @@ lib/
 │   └── daily_forecast_card.dart
 │
 └── main.dart
+```
+
+---
+
+## 🚀 Hướng dẫn chạy dự án
+
+1. Clone project từ Git
+
+```bash
+git clone https://github.com/Noname2k4/flutter_weather_app_VuHoangHiep
+cd weather_app
+```
+
+2. Chạy ứng dụng
+
+```bash
+flutter pub get
+flutter run
 ```
 
 ---
