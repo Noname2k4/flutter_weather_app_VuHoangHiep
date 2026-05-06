@@ -30,8 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final weatherProvider = context.read<WeatherProvider>();
     final searchProvider = context.read<SearchProvider>();
 
-    await searchProvider.loadData();
     await locationProvider.fetchLocation();
+    await searchProvider.loadData();
 
     final location = locationProvider.currentLocation;
     if (location != null) {

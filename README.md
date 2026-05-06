@@ -8,7 +8,7 @@
 
 ## 🎬 Demo
 
-👉 [Video Demo]
+👉 [Video Demo](https://drive.google.com/drive/folders/1QElrrhJGq0Prv9bpMtkMictZsVq20vTy?usp=sharing)
 
 ## 🚀 Các tính năng chính
 
