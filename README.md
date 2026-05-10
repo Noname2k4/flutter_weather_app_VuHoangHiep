@@ -106,8 +106,7 @@ lib/
 ├── services/
 │   ├── weather_service.dart
 │   ├── location_service.dart
-│   ├── storage_service.dart
-│   └── connectivity_service.dart
+│   └── storage_service.dart
 │
 ├── providers/
 │   ├── weather_provider.dart
